@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="openvr_api\openvr_api.dll" TargetPath="openvr_api.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <TargetPath>openvr_api.dll</TargetPath>
+    </None>
+  </ItemGroup>
+
+</Project>
