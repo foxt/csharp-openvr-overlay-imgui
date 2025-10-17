@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using ImGuiNET;
 using Silk.NET.Input;
 using Valve.VR;
 
@@ -47,9 +48,9 @@ public class OVRMouse : IMouse {
 }
 
 public class OVRKeyboard : IKeyboard {
-    public string Name { get; }
-    public int Index { get; }
-    public bool IsConnected { get; }
+    public string Name => "OpenVR Keyboard Overlay";
+    public int Index => 1;
+    public bool IsConnected => true;
     public bool IsKeyPressed(Key key) {
         return false;
     }
@@ -75,10 +76,16 @@ public class OVRInputContext : IInputContext {
     private readonly IReadOnlyList<OVRMouse> _Mice = new[] { new OVRMouse() };
     public IReadOnlyList<IMouse> Mice => _Mice;
 
-    public bool HandleOVREvent(VREvent_t evt) {
+
+    public bool HandleOVREvent(OverlayApp app, VREvent_t evt) {
         var type = (EVREventType)evt.eventType;
         if (type == EVREventType.VREvent_MouseMove) {
-            _Mice[0].Position = new Vector2(evt.data.mouse.x, evt.data.mouse.y);
+            // weird steamvr bug: mouse input from the overlay viewer is flipped
+            // so i flip the mouseY tracked device index is 0 (TrackedDevice_Invalid)
+            _Mice[0].Position = new Vector2(
+                evt.data.mouse.x, 
+                evt.trackedDeviceIndex == 0 ? app.Size.Height - evt.data.mouse.y : evt.data.mouse.y
+            );
         } else if (type == EVREventType.VREvent_MouseButtonDown || type == EVREventType.VREvent_MouseButtonUp) {
             var ovrButton = (EVRMouseButton)evt.data.mouse.button;
             var silkButton =
@@ -86,11 +93,10 @@ public class OVRInputContext : IInputContext {
                 ovrButton == EVRMouseButton.Right ? Silk.NET.Input.MouseButton.Right :
                 Silk.NET.Input.MouseButton.Left;
             var isDown = type == EVREventType.VREvent_MouseButtonDown;
-            
+
             if (isDown) _Mice[0].ButtonState.Add(silkButton);
             else _Mice[0].ButtonState.Remove(silkButton);
-        }
-        else if (type == EVREventType.VREvent_ScrollSmooth) {
+        } else if (type == EVREventType.VREvent_ScrollSmooth) {
             _Mice[0].ScrollX += evt.data.scroll.xdelta;
             _Mice[0].ScrollY += evt.data.scroll.ydelta;
         } else {

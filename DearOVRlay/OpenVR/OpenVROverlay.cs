@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using Silk.NET.Maths;
+using System.Drawing;
 using Valve.VR;
 
 namespace DearOVRlay;
@@ -24,22 +24,26 @@ public class OpenVROverlay {
     ) {
         InitOpenVR();
         OVRUtils.CheckError(OpenVR.Overlay.CreateDashboardOverlay(id, displayName, ref _overlay, ref _overlayThumb));
-        OVRUtils.CheckError(OpenVR.Overlay.SetOverlayFlag(_overlay, VROverlayFlags.EnableClickStabilization, true));
+        OVRUtils.CheckError(OpenVR.Overlay.SetOverlayFlag(_overlay, VROverlayFlags.MinimalControlBar, true));
         OVRUtils.CheckError(OpenVR.Overlay.SetOverlayFlag(_overlay, VROverlayFlags.SendVRSmoothScrollEvents, true));
+        
     }
 
     public string ThumbnailImagePath {
-        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayFromFile(_overlayThumb, value ));
+        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayFromFile(_overlayThumb, value));
     }
     public float WidthInMeters {
-        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayWidthInMeters(_overlay, value ));
+        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayWidthInMeters(_overlay, value));
+    }
+    public string DisplayName {
+        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayName(_overlay, value));
     }
 
     private HmdVector2_t _hmdVector2;
-    public Vector2D<int> OverlayMouseScale {
+    public Size OverlayMouseScale {
         set {
-            _hmdVector2.v0 = value[0];
-            _hmdVector2.v1 = value[1];
+            _hmdVector2.v0 = value.Width;
+            _hmdVector2.v1 = value.Height;
             OVRUtils.CheckError(OpenVR.Overlay.SetOverlayMouseScale(_overlay, ref _hmdVector2));
         }
     }

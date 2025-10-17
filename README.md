@@ -5,12 +5,17 @@
  - [x] Render ImGui to OpenVR overlay
    - [X] Vsync with headset display
    - [X] Pause rendering when overlay hidden
+ - [X] Render to window (for debugging)
+   - [ ] Hotswitch between windowed/OpenVR mode
  - [x] Pass inputs from OpenVR to ImGui
    - [x] Mouse move
    - [x] Left, right & middle click
    - [x] Smooth scrolling
-   - [ ] Keyboard support
-     - [ ] Automatically hide show keyboard
+   - [x] Keyboard support
+     - [x] Automatically hide show keyboard
+
+## Known Issues
+ - [X] ~~Mouse input is flipped vertically when using the overlay viewer~~
 
 ## Requirements
 

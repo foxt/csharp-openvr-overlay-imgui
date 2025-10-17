@@ -7,15 +7,25 @@ namespace DearOVRlay;
 
 public class OpenGLRenderer {
 
-    public static void InitGL(Action<GL> callback) {
+    public static void InitOffscreen(Action<GL> callback, string title = "Dummy window for OpenGL") {
         // it seems like we need to create a window (even though we never interact with it after creating the GL context)
         // so just create a hidden window and 'run' it (we will never let it pump any event loop but still)
         WindowOptions options = WindowOptions.Default;
-        options.Title = "Dummy window for OpenGL";
+        options.Title = title;
         options.Size = new Vector2D<int>(1, 1);
         options.IsVisible = false;
         var window = Window.Create(options);
         window.Load += () => callback(window.CreateOpenGL());
+        window.Run();
+    }
+    public static void InitWindowed(Action<IWindow> callback, Vector2D<int> size, string title = "OpenGL Display") {
+        // it seems like we need to create a window (even though we never interact with it after creating the GL context)
+        // so just create a hidden window and 'run' it (we will never let it pump any event loop but still)
+        WindowOptions options = WindowOptions.Default;
+        options.Title = title;
+        options.Size = size;
+        var window = Window.Create(options);
+        window.Load += () => callback(window);
         window.Run();
     }
 
@@ -24,11 +34,24 @@ public class OpenGLRenderer {
     private uint _rbo;
     public uint texture;
     private Vector2D<int> _size;
+    private bool _renderToWindow;
 
     public OpenGLRenderer(GL gl, Vector2D<int> size) {
         _gl = gl;
         _size = size;
-        
+        _renderToWindow = false;
+        InitGL();
+    }
+    public OpenGLRenderer(IWindow window) {
+        _gl = window.CreateOpenGL();
+        _size = window.FramebufferSize;
+        window.FramebufferResize += size => this.Size = size;
+        _renderToWindow = true;
+        InitGL();
+    }
+
+    private void InitGL() {
+                
         // init the texture we'll pass to OVR
         texture = _gl.GenTexture();
         _gl.ActiveTexture(TextureUnit.Texture0);
@@ -53,7 +76,7 @@ public class OpenGLRenderer {
         _gl.BindTexture(TextureTarget.Texture2D, 0);
         _gl.BindRenderbuffer(GLEnum.Renderbuffer, 0);
     }
-
+    
     public Vector2D<int> Size {
         get => _size;
         set {
@@ -88,6 +111,16 @@ public class OpenGLRenderer {
         render();
         
         _gl.BindFramebuffer(GLEnum.Framebuffer, 0);
+
+        if (_renderToWindow)
+            _gl.BlitNamedFramebuffer(
+                _fbo, 0,
+                0, 0, (int)Width, (int)Height,
+                0, 0, (int)Width, (int)Height,
+                ClearBufferMask.ColorBufferBit,
+                BlitFramebufferFilter.Nearest
+            );
+        
     }
 
 }

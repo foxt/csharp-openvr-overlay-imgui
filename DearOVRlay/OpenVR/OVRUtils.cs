@@ -236,5 +236,37 @@ namespace DearOVRlay
 			if (error != EVROverlayError.None)
 				throw new Exception(error.ToString());
 		}
+
+		private static StringBuilder stringBuilder = new(64);
+		private static ETrackedPropertyError _eTrackedPropertyError = ETrackedPropertyError.TrackedProp_Success;
+
+		private static T? TrackedPropertyErrorCheck<T>(Func<T> call) {
+			_eTrackedPropertyError = ETrackedPropertyError.TrackedProp_Success;
+			var value = call();
+			if (_eTrackedPropertyError == ETrackedPropertyError.TrackedProp_Success)
+				return value;
+			else if (_eTrackedPropertyError == ETrackedPropertyError.TrackedProp_UnknownProperty)
+				return default;
+			else
+				throw new Exception(_eTrackedPropertyError.ToString());
+			
+		}
+		public static string? GetTrackedDeviceStringProperty(uint deviceIdx, ETrackedDeviceProperty property) {
+			try {
+				
+				var ret = TrackedPropertyErrorCheck(() => OpenVR.System.GetStringTrackedDeviceProperty(deviceIdx, property,
+					stringBuilder, (uint)stringBuilder.Capacity, ref _eTrackedPropertyError));
+				if (ret == null) return null;
+				return stringBuilder.ToString();
+			} finally { stringBuilder.Clear(); }
+		}
+		public static bool? GetTrackedDeviceBoolProperty(uint deviceIdx, ETrackedDeviceProperty property) {
+			return TrackedPropertyErrorCheck(() =>
+				OpenVR.System.GetBoolTrackedDeviceProperty(deviceIdx, property, ref _eTrackedPropertyError));
+		}
+		public static float? GetTrackedDeviceFloatProperty(uint deviceIdx, ETrackedDeviceProperty property) {
+			return TrackedPropertyErrorCheck(() =>
+				OpenVR.System.GetFloatTrackedDeviceProperty(deviceIdx, property, ref _eTrackedPropertyError));
+		}
     }
 }
