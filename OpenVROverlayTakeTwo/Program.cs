@@ -6,9 +6,32 @@ using Valve.VR;
 
 namespace OpenVROverlayTakeTwo;
 
-public class Program
-{
+public class Program {
+    private static Vector4 Red = new(1, 0, 0, 0);
+    private static Dictionary<uint, SortedDictionary<string,string>> deviceProps = new ();
+    private static SortedDictionary<string, string> EnumTrackedDeviceProps(uint device) {
+        var enumMembers = (ETrackedDeviceProperty[])Enum.GetValues(typeof(ETrackedDeviceProperty));
+        Array.Sort(
+            enumMembers,
+            (x, y) => x.ToString().CompareTo(y.ToString())
+        );
+        SortedDictionary<string, string> dic = new();
+        foreach (var enumMember in enumMembers) {
+            var memberName = enumMember.ToString();
+            try {
+                var value = OVRUtils.GetTrackedDeviceProperty(device, enumMember);
+                var text = value is null ? "(null)" : value.ToString();
+                dic.Add(memberName, text);
+            } catch (Exception ex) {
+                dic.Add(memberName, ex.Message);
+            }
+        }
+        deviceProps.Add(device, dic);
+        return dic;
+    }
+    
     public static void Main(string[] args) {
+        
         var app = new OverlayApp("test") {
             DisplayName = "C# + OpenVR Overlay + DearImGUI",
             ThumbnailImagePath = "C:\\Users\\foxt\\Downloads\\sunglass.png",
@@ -34,9 +57,23 @@ public class Program
                     OVRUtils.GetTrackedDeviceStringProperty(i, ETrackedDeviceProperty.Prop_ModelNumber_String);
                 var deviceMfg =
                     OVRUtils.GetTrackedDeviceStringProperty(i, ETrackedDeviceProperty.Prop_ManufacturerName_String);
-                
-                
-                ImGui.Text($"#{i}: {className} ({deviceMfg} {deviceModel})");
+                if (ImGui.CollapsingHeader($"#{i}: {className} ({deviceMfg} {deviceModel})")) {
+                    var refresh = ImGui.Button("Refresh " + i);
+                    var dic = (deviceProps.ContainsKey(i) && !refresh) ? deviceProps[i] : EnumTrackedDeviceProps(i);
+                    if (ImGui.BeginTable("TrackedDeviceProperties."+i, 2))
+                    {
+                        foreach (var member in dic) {
+                            ImGui.TableNextRow();
+                            ImGui.TableNextColumn();
+                            ImGui.Text(member.Key);
+                            ImGui.TableNextColumn();
+                            ImGui.Text(member.Value);
+                        }
+                        ImGui.EndTable();
+                    }
+
+                }
+
 
                 try {
                     var hasBattery = OVRUtils.GetTrackedDeviceBoolProperty(i,

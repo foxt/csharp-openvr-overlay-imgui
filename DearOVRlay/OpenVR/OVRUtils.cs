@@ -268,5 +268,24 @@ namespace DearOVRlay
 			return TrackedPropertyErrorCheck(() =>
 				OpenVR.System.GetFloatTrackedDeviceProperty(deviceIdx, property, ref _eTrackedPropertyError));
 		}
+
+		public static int? GetTrackedDeviceInt32Property(uint deviceIdx, ETrackedDeviceProperty property) {
+			return TrackedPropertyErrorCheck(() =>
+				OpenVR.System.GetInt32TrackedDeviceProperty(deviceIdx, property, ref _eTrackedPropertyError));
+		}
+		public static ulong? GetTrackedDeviceUint64Property(uint deviceIdx, ETrackedDeviceProperty property) {
+			return TrackedPropertyErrorCheck(() =>
+				OpenVR.System.GetUint64TrackedDeviceProperty(deviceIdx, property, ref _eTrackedPropertyError));
+		}
+
+		public static object GetTrackedDeviceProperty(uint deviceIdx, ETrackedDeviceProperty property) {
+			var type = property.ToString().Split('_').Last();
+			if (type == "String") return GetTrackedDeviceStringProperty(deviceIdx, property);
+			else if (type == "Bool") return GetTrackedDeviceBoolProperty(deviceIdx, property);
+			else if (type == "Float") return GetTrackedDeviceFloatProperty(deviceIdx, property);
+			else if (type == "Int32") return GetTrackedDeviceInt32Property(deviceIdx, property);
+			else if (type == "Uint64") return GetTrackedDeviceUint64Property(deviceIdx, property);
+			else return $"(unknown type {type})";
+		}
     }
 }
