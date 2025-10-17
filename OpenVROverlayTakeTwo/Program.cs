@@ -9,8 +9,8 @@ public class Program
         var app = new OverlayApp(
             "test",
             "C# + OpenVR Overlay + DearImGUI",
-            800,
-            600
+            1920,
+            1080
         ) {
             ThumbnailImagePath = "C:\\Users\\foxt\\Downloads\\sunglass.png",
             WidthInMeters = 3.14f

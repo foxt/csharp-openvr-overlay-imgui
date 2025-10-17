@@ -32,7 +32,7 @@ public class OpenVROverlay {
         set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayFromFile(_overlayThumb, value ));
     }
     public float WidthInMeters {
-        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayWidthInMeters(_overlayThumb, 3.14f ));
+        set => OVRUtils.CheckError(OpenVR.Overlay.SetOverlayWidthInMeters(_overlay, value ));
     }
 
     private HmdVector2_t _hmdVector2;
